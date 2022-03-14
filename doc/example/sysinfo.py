@@ -41,7 +41,7 @@ def parsehosts(path):
     for line in path.readlines():
         m = rex.match(line)
         if m is not None:
-            sshname, = m.groups()
+            (sshname,) = m.groups()
             l.append(sshname)
     return l
 
@@ -119,7 +119,7 @@ class RemoteInfo:
 
 
 def debug(*args):
-    print >>sys.stderr, " ".join(map(str, args))
+    print >> sys.stderr, " ".join(map(str, args))
 
 
 def error(*args):
