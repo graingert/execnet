@@ -187,9 +187,9 @@ def get_execmodel(backend):
 
 
 class Reply(object):
-    """ reply instances provide access to the result
-        of a function execution that got dispatched
-        through WorkerPool.spawn()
+    """reply instances provide access to the result
+    of a function execution that got dispatched
+    through WorkerPool.spawn()
     """
 
     def __init__(self, task, threadmodel):
@@ -198,10 +198,10 @@ class Reply(object):
         self.running = True
 
     def get(self, timeout=None):
-        """ get the result object from an asynchronous function execution.
-            if the function execution raised an exception,
-            then calling get() will reraise that exception
-            including its traceback.
+        """get the result object from an asynchronous function execution.
+        if the function execution raised an exception,
+        then calling get() will reraise that exception
+        including its traceback.
         """
         self.waitfinish(timeout)
         try:
@@ -228,18 +228,18 @@ class Reply(object):
 
 
 class WorkerPool(object):
-    """ A WorkerPool allows to spawn function executions
-        to threads, returning a reply object on which you
-        can ask for the result (and get exceptions reraised).
+    """A WorkerPool allows to spawn function executions
+    to threads, returning a reply object on which you
+    can ask for the result (and get exceptions reraised).
 
-        This implementation allows the main thread to integrate
-        itself into performing function execution through
-        calling integrate_as_primary_thread() which will return
-        when the pool received a trigger_shutdown().
+    This implementation allows the main thread to integrate
+    itself into performing function execution through
+    calling integrate_as_primary_thread() which will return
+    when the pool received a trigger_shutdown().
     """
 
     def __init__(self, execmodel, hasprimary=False):
-        """ by default allow unlimited number of spawns. """
+        """by default allow unlimited number of spawns."""
         self.execmodel = execmodel
         self._running_lock = self.execmodel.Lock()
         self._running = set()
@@ -253,7 +253,7 @@ class WorkerPool(object):
             self._primary_thread_task_ready = None
 
     def integrate_as_primary_thread(self):
-        """ integrate the thread with which we are called as a primary
+        """integrate the thread with which we are called as a primary
         thread for executing functions triggered with spawn().
         """
         assert self.execmodel.backend == "thread", self.execmodel
@@ -303,8 +303,8 @@ class WorkerPool(object):
         return False
 
     def spawn(self, func, *args, **kwargs):
-        """ return Reply object for the asynchronous dispatch
-            of the given func(*args, **kwargs).
+        """return Reply object for the asynchronous dispatch
+        of the given func(*args, **kwargs).
         """
         reply = Reply((func, args, kwargs), self.execmodel)
         with self._running_lock:
@@ -316,12 +316,12 @@ class WorkerPool(object):
         return reply
 
     def terminate(self, timeout=None):
-        """ trigger shutdown and wait for completion of all executions. """
+        """trigger shutdown and wait for completion of all executions."""
         self.trigger_shutdown()
         return self.waitall(timeout=timeout)
 
     def waitall(self, timeout=None):
-        """ wait until all active spawns have finished executing. """
+        """wait until all active spawns have finished executing."""
         with self._running_lock:
             if not self._running:
                 return True
@@ -348,7 +348,6 @@ if DEBUG == "2":
         except Exception:
             pass  # nothing we can do, likely interpreter-shutdown
 
-
 elif DEBUG:
     import tempfile
     import os
@@ -368,7 +367,6 @@ elif DEBUG:
                 sys.stderr.write("[{}] exception during tracing: {!r}\n".format(pid, v))
             except Exception:
                 pass  # nothing we can do, likely interpreter-shutdown
-
 
 else:
     notrace = trace = lambda *msg: None
@@ -393,7 +391,7 @@ class Popen2IO:
         self.execmodel = execmodel
 
     def read(self, numbytes):
-        """Read exactly 'numbytes' bytes from the pipe. """
+        """Read exactly 'numbytes' bytes from the pipe."""
         # a file in non-blocking mode may return less bytes, so we loop
         buf = bytes()
         while numbytes > len(buf):
@@ -404,7 +402,7 @@ class Popen2IO:
         return buf
 
     def write(self, data):
-        """write out all data bytes. """
+        """write out all data bytes."""
         assert isinstance(data, bytes)
         self._write(data)
         self.outfile.flush()
@@ -417,7 +415,7 @@ class Popen2IO:
 
 
 class Message:
-    """ encapsulates Messages and their wire protocol. """
+    """encapsulates Messages and their wire protocol."""
 
     _types = []
 
@@ -453,7 +451,7 @@ class Message:
 
 
 class GatewayReceivedTerminate(Exception):
-    """ Receiverthread got termination message. """
+    """Receiverthread got termination message."""
 
 
 def _setupmessages():
@@ -525,7 +523,7 @@ def geterrortext(excinfo, format_exception=traceback.format_exception, sysex=sys
 
 
 class RemoteError(Exception):
-    """ Exception containing a stringified error from the other side. """
+    """Exception containing a stringified error from the other side."""
 
     def __init__(self, formatted):
         self.formatted = formatted
@@ -544,7 +542,7 @@ class RemoteError(Exception):
 
 
 class TimeoutError(IOError):
-    """ Exception indicating that a timeout was reached. """
+    """Exception indicating that a timeout was reached."""
 
 
 NO_ENDMARKER_WANTED = object()
@@ -572,14 +570,14 @@ class Channel(object):
         self.gateway._trace(self.id, *msg)
 
     def setcallback(self, callback, endmarker=NO_ENDMARKER_WANTED):
-        """ set a callback function for receiving items.
+        """set a callback function for receiving items.
 
-            All already queued items will immediately trigger the callback.
-            Afterwards the callback will execute in the receiver thread
-            for each received data item and calls to ``receive()`` will
-            raise an error.
-            If an endmarker is specified the callback will eventually
-            be called with the endmarker when the channel closes.
+        All already queued items will immediately trigger the callback.
+        Afterwards the callback will execute in the receiver thread
+        for each received data item and calls to ``receive()`` will
+        raise an error.
+        If an endmarker is specified the callback will eventually
+        be called with the endmarker when the channel closes.
         """
         _callbacks = self.gateway._channelfactory._callbacks
         with self.gateway._receivelock:
@@ -650,15 +648,15 @@ class Channel(object):
     # public API for channel objects
     #
     def isclosed(self):
-        """ return True if the channel is closed. A closed
-            channel may still hold items.
+        """return True if the channel is closed. A closed
+        channel may still hold items.
         """
         return self._closed
 
     def makefile(self, mode="w", proxyclose=False):
-        """ return a file-like object.
-            mode can be 'w' or 'r' for writeable/readable files.
-            if proxyclose is true file.close() will also close the channel.
+        """return a file-like object.
+        mode can be 'w' or 'r' for writeable/readable files.
+        if proxyclose is true file.close() will also close the channel.
         """
         if mode == "w":
             return ChannelFileWrite(channel=self, proxyclose=proxyclose)
@@ -667,10 +665,10 @@ class Channel(object):
         raise ValueError("mode {!r} not availabe".format(mode))
 
     def close(self, error=None):
-        """ close down this channel with an optional error message.
-            Note that closing of a channel tied to remote_exec happens
-            automatically at the end of execution and cannot
-            be done explicitely.
+        """close down this channel with an optional error message.
+        Note that closing of a channel tied to remote_exec happens
+        automatically at the end of execution and cannot
+        be done explicitely.
         """
         if self._executing:
             raise IOError("cannot explicitly close channel within remote_exec")
@@ -699,7 +697,7 @@ class Channel(object):
             self.gateway._channelfactory._no_longer_opened(self.id)
 
     def waitclose(self, timeout=None):
-        """ wait until this channel is closed (or the remote side
+        """wait until this channel is closed (or the remote side
         otherwise signalled that no more data was being sent).
         The channel may still hold receiveable items, but not receive
         any more after waitclose() has returned.  Exceptions from executing
@@ -787,7 +785,7 @@ class ChannelFactory(object):
         self._list = list  # needed during interp-shutdown
 
     def new(self, id=None):
-        """ create a new Channel with 'id' (or create new id if None). """
+        """create a new Channel with 'id' (or create new id if None)."""
         with self._writelock:
             if self.finished:
                 raise IOError("connexion already closed: {}".format(self.gateway))
@@ -1011,11 +1009,11 @@ class BaseGateway(object):
     # _____________________________________________________________________
     #
     def newchannel(self):
-        """ return a new independent channel. """
+        """return a new independent channel."""
         return self._channelfactory.new()
 
     def join(self, timeout=None):
-        """ Wait for receiverthread to terminate. """
+        """Wait for receiverthread to terminate."""
         self._trace("waiting for receiver thread to finish")
         self._receivepool.waitall()
 
@@ -1125,7 +1123,6 @@ if ISPY3:
 
     def bchr(n):
         return bytes([n])
-
 
 else:
     bchr = chr
@@ -1296,7 +1293,7 @@ class Unserializer(object):
 
 
 class opcode:
-    """ container for name -> num mappings. """
+    """container for name -> num mappings."""
 
 
 def _buildopcodes():
@@ -1319,7 +1316,7 @@ _buildopcodes()
 
 
 def dumps(obj):
-    """ return a serialized bytestring of the given obj.
+    """return a serialized bytestring of the given obj.
 
     The obj and all contained objects must be of a builtin
     python type (so nested dicts, sets, etc. are all ok but
@@ -1329,12 +1326,12 @@ def dumps(obj):
 
 
 def dump(byteio, obj):
-    """ write a serialized bytestring of the given obj to the given stream. """
+    """write a serialized bytestring of the given obj to the given stream."""
     _Serializer(write=byteio.write).save(obj, versioned=True)
 
 
 def loads(bytestring, py2str_as_py3str=False, py3str_as_py2str=False):
-    """ return the object as deserialized from the given bytestring.
+    """return the object as deserialized from the given bytestring.
 
     py2str_as_py3str: if true then string (str) objects previously
                       dumped on Python2 will be loaded as Python3
@@ -1354,7 +1351,7 @@ def loads(bytestring, py2str_as_py3str=False, py3str_as_py2str=False):
 
 
 def load(io, py2str_as_py3str=False, py3str_as_py2str=False):
-    """ derserialize an object form the specified stream.
+    """derserialize an object form the specified stream.
 
     Behaviour and parameters are otherwise the same as with ``loads``
     """
